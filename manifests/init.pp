@@ -8,6 +8,17 @@
 class incron (
   Array[String] $users = []
 ) {
+  if $facts['os']['name'] in ['RedHat','CentOS'] {
+    $_incron_package = 'incron'
+    $_incron_service = 'incrond'
+  }
+  elsif $facts['os']['name'] in ['Debian','Ubuntu'] {
+    $_incron_package = 'incron'
+    $_incron_service = 'incron'
+  }
+  else {
+    fail("OS '${facts['os']['name']}' not supported by '${module_name}'")
+  }
 
   $users.each |String $user| {
     ::incron::user { $user: }
@@ -26,11 +37,11 @@ class incron (
     ensure => 'absent'
   }
 
-  package { 'incron':
+  package { $_incron_package:
     ensure => latest
   }
 
-  service { 'incrond':
+  service { $_incron_service:
     ensure     => 'running',
     enable     => true,
     hasstatus  => true,
